@@ -1,12 +1,36 @@
 import os
 import shutil
+import sys
+from importlib.resources import files
+
+
+_DEVNULL_STDOUT = None
+_DEVNULL_STDERR = None
+
+
+def _ensure_standard_streams():
+    """
+    GUI-mode Windows executables can start without stdout/stderr. Some
+    scientific dependencies still write to these streams during import.
+    """
+    global _DEVNULL_STDOUT, _DEVNULL_STDERR
+
+    if sys.stdout is None:
+        _DEVNULL_STDOUT = open(os.devnull, "w", encoding="utf-8")
+        sys.stdout = _DEVNULL_STDOUT
+
+    if sys.stderr is None:
+        _DEVNULL_STDERR = open(os.devnull, "w", encoding="utf-8")
+        sys.stderr = _DEVNULL_STDERR
+
+
+_ensure_standard_streams()
 
 from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, \
     QMessageBox
 from PySide6.QtCore import Signal, QCoreApplication, QSettings, QThread, Slot, \
     qInstallMessageHandler, QtMsgType
-import sys
 from typing import Callable
 import umsgpack
 import uuid
@@ -701,7 +725,7 @@ def start_gui():
         qInstallMessageHandler(qt_message_handler)
 
         icon = QIcon()
-        icon.addFile("./gui_files/icon.png")
+        icon.addFile(str(files("gui_files").joinpath("icon.png")))
         app.setWindowIcon(icon)
         ProgramStateSingleton().program_state.icon = icon
         window = MainWindow()

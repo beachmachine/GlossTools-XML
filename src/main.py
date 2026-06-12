@@ -504,7 +504,7 @@ def bulk_create_glp(input_folder: str, ocr_model: str):
             file.write(compressed_data)
 
 
-if __name__ == "__main__":
+def main(argv: list[str] | None = None):
     parser = argparse.ArgumentParser(description="XML Tools for the GlossIT project.")
 
     subparsers = parser.add_subparsers(dest="mode", required=True)
@@ -577,7 +577,7 @@ if __name__ == "__main__":
     parser_mode_bulk_create_glp.add_argument("--ocr-model", type=str, required=True,
                                              help="Path to Kraken OCR model")
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # dispatch based on mode
     if args.mode == "xslt":
@@ -625,4 +625,5 @@ if __name__ == "__main__":
         )
 
 
-
+if __name__ == "__main__":
+    main()

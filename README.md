@@ -22,6 +22,7 @@ can be held responsible for them.
 0. [Connecting Glosses](#connecting-glosses)
    1. [GlossIT Gloss Connector GUI](#2-glossit-gloss-connector-gui)
    2. [Bulk Processing of Files](#4-bulk-processing-of-files)
+0. [Building and Publishing](#building-and-publishing)
 
 ## Preparing the Environment
 
@@ -33,6 +34,64 @@ can be held responsible for them.
 5. Install the Junicode font on your system from this page (or use a newer version):
    https://sourceforge.net/projects/junicode/files/junicode/junicode-1.002/junicode-1.002.zip/download
 6. If necessary, delete the `matplotlib` font cache. It is usually a JSON file in the path `~/.cache/matplotlib`.
+
+After installing the package from a wheel, the command line interface is available as `glosstools-xml` and the GUI
+launcher is available as `glossit-gloss-connector`.
+
+## Building and Publishing
+
+The package metadata is defined in `setup.py`. Use Python 3.12 for all build commands, because the application
+dependencies are pinned for Python 3.12.
+
+### Wheel
+
+From the repository root:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -e ".[publish]"
+python -m build --wheel
+```
+
+The wheel is written to `dist/`. To upload it to PyPI:
+
+```bash
+python -m twine upload dist/*.whl
+```
+
+For a test upload first, use:
+
+```bash
+python -m twine upload --repository testpypi dist/*.whl
+```
+
+### Windows EXE
+
+Build the self-contained Windows executable on Windows with Python 3.12:
+
+```bat
+py -3.12 -m venv .venv
+.venv\Scripts\activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[windows]"
+python setup.py bdist_exe
+```
+
+The single-file GUI executable is written to `dist\GlossToolsXML.exe`. It includes the Python 3.12 runtime used for the
+build. The executable build uses targeted hidden imports and excludes unused training/conversion modules to keep the
+artifact size down.
+
+### Windows MSI Installer
+
+Create the MSI from the same Windows Python 3.12 environment:
+
+```bat
+python setup.py bdist_msi
+```
+
+The installer is written to `dist\GlossToolsXML-0.1.0-win64.msi` and contains the frozen application plus the embedded
+Python 3.12 runtime. The MSI creates a Start Menu entry named `GlossIT Gloss Connector` for the GUI application and
+also installs `glosstools-xml-cli.exe` for command line tasks.
 
 
 ## Apply XSLT transformation to eScriptorium METS File
@@ -311,4 +370,3 @@ into the input folder.
    * `python main.py bulk-create-glp --input-folder <path_to_input_folder> --ocr-model <path_to_ocr_model>`
    * `<path_to_input_folder>` is the path to the folder that contains the pairs `<name>_METS.xml` and `<name>_TEI.xml`.
    * `<path_to_ocr_model>` is the path to the Kraken OCR model (needed for automatically determining word boundaries).
-
